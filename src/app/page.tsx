@@ -2,6 +2,9 @@ import Link from "next/link";
 import { defineQuery } from "next-sanity";
 import { sanityFetch } from "@/src/sanity/live";
 
+//
+export const dynamic = "force-dynamic";
+
 const EVENTS_QUERY = defineQuery(`*[
   _type == "event"
   && defined(slug.current)
