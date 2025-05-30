@@ -2,21 +2,19 @@ import { client } from "@/src/sanity/client";
 import { sanityFetch } from "@/src/sanity/live";
 import imageUrlBuilder from "@sanity/image-url";
 import { SanityImageSource } from "@sanity/image-url/lib/types/types";
-import { defineQuery, PortableText } from "next-sanity";
+import { PortableText } from "next-sanity";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-const EVENT_QUERY = defineQuery(`*[
+const EVENT_QUERY = `*[
     _type == "event" &&
     slug.current == $slug
   ][0]{
   ...,
-  "date": coalesce(date, now()),
-  "doorsOpen": coalesce(doorsOpen, 0),
   headline->,
   venue->
-}`);
+}`;
 
 const { projectId, dataset } = client.config();
 const urlFor = (source: SanityImageSource) =>
@@ -33,11 +31,23 @@ export default async function EventPage({
     query: EVENT_QUERY,
     params: await params
   });
+
+  console.log("Event data:", event);
+
   if (!event) {
     notFound();
   }
-  const { name, date, image, details, eventType, doorsOpen, venue, tickets } =
-    event;
+  const {
+    name,
+    date,
+    headline,
+    image,
+    details,
+    format,
+    doorsOpen,
+    venue,
+    tickets
+  } = event;
   const eventImageUrl = image
     ? urlFor(image)?.width(550).height(310).url()
     : null;
@@ -62,20 +72,20 @@ export default async function EventPage({
         />
         <div className="flex flex-col justify-center space-y-4">
           <div className="space-y-4">
-            {eventType ? (
-              <div className="inline-block rounded-lg bg-gray-100 px-3 py-1 text-sm capitalize">
-                {eventType.replace("-", " ")}
+            {format && (
+              <div className="inline-block rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800 dark:text-white capitalize">
+                {format.replace("-", " ")}
               </div>
-            ) : null}
-            {event?.name ? (
+            )}
+            {name ? (
               <h1 className="text-4xl font-medium tracking-tighter mb-8">
                 {event?.name}
               </h1>
             ) : null}
-            {event?.name ? (
+            {headline?.name ? (
               <dl className="grid grid-cols-2 gap-1 text-sm font-medium sm:gap-2 lg:text-base">
                 <dd className="font-semibold">Artist</dd>
-                <dt> {event?.name}</dt>
+                <dt> {name}</dt>
               </dl>
             ) : null}
             <dl className="grid grid-cols-2 gap-1 text-sm font-medium sm:gap-2 lg:text-base">
